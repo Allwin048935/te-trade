@@ -47,6 +47,7 @@ df['long_ema'] = df['close'].ewm(span=long_ema_period, adjust=False).mean()
 position = None
 confirm_count = 0
 
+amount=quantity 
 # Trading logic
 for i in range(long_ema_period, len(df)):
     if df['short_ema'][i] > df['medium_ema'][i] and df['short_ema'][i - 1] <= df['medium_ema'][i - 1]:
@@ -56,7 +57,7 @@ for i in range(long_ema_period, len(df)):
         if confirm_count >= confirmation_buffer and position != 'long':
             print('Confirmed Long Position')
             quantity = fixed_quantity_usdt / df['close'][i]  # Calculate quantity based on fixed USDT amount
-            place_order('buy', quantity)
+            place_order('buy', amount)
             position = 'long'
             confirm_count = 0  # Reset confirmation count
 
@@ -67,7 +68,7 @@ for i in range(long_ema_period, len(df)):
         if confirm_count >= confirmation_buffer and position != 'short':
             print('Confirmed Short Position')
             quantity = fixed_quantity_usdt / df['close'][i]  # Calculate quantity based on fixed USDT amount
-            place_order('sell', quantity)
+            place_order('sell', amount)
             position = 'short'
             confirm_count = 0  # Reset confirmation count
 
@@ -76,7 +77,7 @@ for i in range(long_ema_period, len(df)):
         if position == 'long':
             print('Close Long Position')
             quantity = fixed_quantity_usdt / df['close'][i]  # Calculate quantity based on fixed USDT amount
-            place_order('sell', quantity)
+            place_order('sell', amount)
             position = None
 
     elif df['short_ema'][i] > df['medium_ema'][i] and df['short_ema'][i - 1] < df['medium_ema'][i - 1]:
@@ -84,7 +85,7 @@ for i in range(long_ema_period, len(df)):
         if position == 'short':
             print('Close Short Position')
             quantity = fixed_quantity_usdt / df['close'][i]  # Calculate quantity based on fixed USDT amount
-            place_order('buy', quantity)
+            place_order('buy', amount)
             position = None
 
     time.sleep(1)  # Add a delay to avoid hitting rate limits
