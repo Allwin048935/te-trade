@@ -3,11 +3,13 @@ import pandas as pd
 import time
 from config import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval, short_ema_period, medium_ema_period, long_ema_period, fixed_usdt_amount
 
-# Set up the Binance Futures client
-exchange = ccxt.binanceusdm({
+exchange = ccxt.binance({
     'apiKey': BINANCE_API_KEY,
     'secret': BINANCE_API_SECRET,
     'enableRateLimit': True,
+    'options': {
+        'defaultType': 'future',  # Set the default type to futures
+    }
 })
 
 # Function to fetch historical candlestick data and calculate EMAs
