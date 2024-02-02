@@ -34,14 +34,14 @@ def calculate_quantity(symbol, usdt_amount):
     return quantity
 
 # Function to place a market buy order for futures
-def place_market_buy_order(symbol, quantity):
-    order = exchange.create_market_buy(symbol=symbol, quantity=quantity)
+def place_market_buy_order(symbol, amount):
+    order = exchange.create_market_buy(symbol=symbol, amount=quantity)
     print(f"Market Buy Order placed for {symbol}: {order}")
     return order
 
 # Function to place a market sell order for futures
-def place_market_sell_order(symbol, quantity):
-    order = exchange.create_market_sell(symbol=symbol, quantity=quantity)
+def place_market_sell_order(symbol, amount):
+    order = exchange.create_market_sell(symbol=symbol, amount=quantity)
     print(f"Market Sell Order placed for {symbol}: {order}")
     return order
 
