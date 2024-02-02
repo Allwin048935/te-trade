@@ -111,11 +111,11 @@ def ema_strategy():
                     print(f'{symbol} Short EMA crossed over Medium EMA - Close Short Order')
 
             # Sleep for some time (e.g., 1 hour) before checking again
-            time.sleep(60)
+            time.sleep(300)
 
         except Exception as e:
             print(f"An error occurred: {e}")
-            time.sleep(60)  # Wait for 5 minutes before trying again
+            time.sleep(300)  # Wait for 5 minutes before trying again
 
 # Run the trading strategy
 ema_strategy()
