@@ -3,8 +3,8 @@ import pandas as pd
 import time
 from config import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval, short_ema_period, medium_ema_period, long_ema_period, fixed_usdt_amount
 
-# Set up the Binance client
-exchange = ccxt.binance({
+# Set up the Binance Futures client
+exchange = ccxt.binanceusdm({
     'apiKey': BINANCE_API_KEY,
     'secret': BINANCE_API_SECRET,
     'enableRateLimit': True,
@@ -19,30 +19,31 @@ def fetch_and_calculate_emas(symbol, short_period, medium_period, long_period, l
     df['long_ema'] = df['close'].ewm(span=long_period, adjust=False).mean()
     return df
 
-# Function to get the current market price
+# Function to get the current market price for futures
 def get_market_price(symbol):
     ticker = exchange.fetch_ticker(symbol)
     return ticker['last']
 
-# Function to calculate the quantity based on fixed USDT amount
+# Function to calculate the quantity based on fixed USDT amount for futures
 def calculate_quantity(symbol, usdt_amount):
     market_price = get_market_price(symbol)
-    quantity = usdt_amount / market_price
+    contract_size = exchange.fetch_ticker(symbol)['info']['contractSize']
+    quantity = usdt_amount / market_price / contract_size
     return quantity
 
-# Function to place a market buy order
+# Function to place a market buy order for futures
 def place_market_buy_order(symbol, quantity):
-    order = exchange.create_market_buy_order(symbol=symbol, amount=quantity)
+    order = exchange.create_market_buy(symbol=symbol, quantity=quantity)
     print(f"Market Buy Order placed for {symbol}: {order}")
     return order
 
-# Function to place a market sell order
+# Function to place a market sell order for futures
 def place_market_sell_order(symbol, quantity):
-    order = exchange.create_market_sell_order(symbol=symbol, amount=quantity)
+    order = exchange.create_market_sell(symbol=symbol, quantity=quantity)
     print(f"Market Sell Order placed for {symbol}: {order}")
     return order
 
-# Function to place a market close order
+# Function to place a market close order for futures
 def close_position(symbol, position_type):
     if position_type == 'long':
         place_market_sell_order(symbol, calculate_quantity(symbol, fixed_usdt_amount))
@@ -110,7 +111,7 @@ def ema_strategy():
                         position_types[symbol] = None
                     print(f'{symbol} Short EMA crossed over Medium EMA - Close Short Order')
 
-            # Sleep for some time (e.g., 1 hour) before checking again
+            # Sleep for some time (e.g., 5 minutes) before checking again
             time.sleep(300)
 
         except Exception as e:
