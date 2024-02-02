@@ -1,62 +1,90 @@
 import ccxt
 import pandas as pd
+import time
 
-# Replace with your Binance API key and secret
+# Initialize Binance API for Futures
 api_key = 'your_api_key'
 api_secret = 'your_api_secret'
-
-# Initialize Binance client
-binance = ccxt.binance({
-    'apiKey': api_key,
-    'secret': api_secret,
-})
-
-# Define trading symbol and time frame
 symbol = 'BTC/USDT'
 timeframe = '1h'
+short_ema_period = 9
+medium_ema_period = 21
+long_ema_period = 50
+confirmation_buffer = 3  # Number of consecutive periods to confirm the cross
+fixed_quantity_usdt = 100  # Fixed quantity in USDT for each trade
 
-# Function to get historical candlestick data
-def get_historical_data(symbol, timeframe, limit=100):
-    ohlcv = binance.fetch_ohlcv(symbol, timeframe, limit=limit)
-    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
-    return df
+# Set up the Binance Futures exchange
+exchange = ccxt.binance({
+    'apiKey': api_key,
+    'secret': api_secret,
+    'enableRateLimit': True,
+    'options': {
+        'defaultType': 'future',
+    },
+})
 
-# Function to implement 3 EMA crossover strategy
-def ema_crossover_strategy(df, short_ema, long_ema):
-    df['short_ema'] = df['close'].ewm(span=short_ema, adjust=False).mean()
-    df['long_ema'] = df['close'].ewm(span=long_ema, adjust=False).mean()
-    df['signal'] = 0  # 0 for no signal, 1 for buy, -1 for sell
+# Function to place a market order
+def place_order(side, quantity):
+    try:
+        order = exchange.create_market_buy(symbol=symbol, quantity=quantity) if side == 'buy' else exchange.create_market_sell(symbol=symbol, quantity=quantity)
+        print(f"Order placed: {order}")
+        return order
+    except ccxt.BaseError as e:
+        print(f"Failed to place order: {e}")
 
-    df.loc[df['short_ema'] > df['long_ema'], 'signal'] = 1
-    df.loc[df['short_ema'] < df['long_ema'], 'signal'] = -1
+# Fetch historical data
+ohlcv = exchange.fetch_ohlcv(symbol, timeframe)
+df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+df.set_index('timestamp', inplace=True)
 
-    return df
+# Calculate EMAs
+df['short_ema'] = df['close'].ewm(span=short_ema_period, adjust=False).mean()
+df['medium_ema'] = df['close'].ewm(span=medium_ema_period, adjust=False).mean()
+df['long_ema'] = df['close'].ewm(span=long_ema_period, adjust=False).mean()
 
-# Function to execute trades based on signals
-def execute_trades(df):
-    for i in range(1, len(df)):
-        if df['signal'][i] == 1 and df['signal'][i - 1] != 1:
-            print(f"Buy signal at {df.index[i]}, Price: {df['close'][i]}")
-            # Implement buy order logic here using Binance API
-        elif df['signal'][i] == -1 and df['signal'][i - 1] != -1:
-            print(f"Sell signal at {df.index[i]}, Price: {df['close'][i]}")
-            # Implement sell order logic here using Binance API
+# Initialize position and confirmation counters
+position = None
+confirm_count = 0
 
-# Main function to run the trading bot
-def main():
-    short_ema_period = 9
-    long_ema_period = 21
+# Trading logic
+for i in range(long_ema_period, len(df)):
+    if df['short_ema'][i] > df['medium_ema'][i] and df['short_ema'][i - 1] <= df['medium_ema'][i - 1]:
+        # Short EMA crosses over Medium EMA, start confirmation count
+        confirm_count += 1
 
-    # Fetch historical data
-    historical_data = get_historical_data(symbol, timeframe)
+        if confirm_count >= confirmation_buffer and position != 'long':
+            print('Confirmed Long Position')
+            quantity = fixed_quantity_usdt / df['close'][i]  # Calculate quantity based on fixed USDT amount
+            place_order('buy', quantity)
+            position = 'long'
+            confirm_count = 0  # Reset confirmation count
 
-    # Implement EMA crossover strategy
-    strategy_data = ema_crossover_strategy(historical_data, short_ema_period, long_ema_period)
+    elif df['short_ema'][i] < df['medium_ema'][i] and df['short_ema'][i - 1] >= df['medium_ema'][i - 1]:
+        # Short EMA crosses under Medium EMA, start confirmation count
+        confirm_count += 1
 
-    # Execute trades based on signals
-    execute_trades(strategy_data)
+        if confirm_count >= confirmation_buffer and position != 'short':
+            print('Confirmed Short Position')
+            quantity = fixed_quantity_usdt / df['close'][i]  # Calculate quantity based on fixed USDT amount
+            place_order('sell', quantity)
+            position = 'short'
+            confirm_count = 0  # Reset confirmation count
 
-if __name__ == "__main__":
-    main()
+    elif df['short_ema'][i] < df['medium_ema'][i] and df['short_ema'][i - 1] > df['medium_ema'][i - 1]:
+        # Short EMA crosses under Medium EMA, close existing long position
+        if position == 'long':
+            print('Close Long Position')
+            quantity = fixed_quantity_usdt / df['close'][i]  # Calculate quantity based on fixed USDT amount
+            place_order('sell', quantity)
+            position = None
+
+    elif df['short_ema'][i] > df['medium_ema'][i] and df['short_ema'][i - 1] < df['medium_ema'][i - 1]:
+        # Short EMA crosses over Medium EMA, close existing short position
+        if position == 'short':
+            print('Close Short Position')
+            quantity = fixed_quantity_usdt / df['close'][i]  # Calculate quantity based on fixed USDT amount
+            place_order('buy', quantity)
+            position = None
+
+    time.sleep(1)  # Add a delay to avoid hitting rate limits
