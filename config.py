@@ -1,13 +1,13 @@
+# Replace with your Binance API key and secret
+BINANCE_API_KEY = 'your_api_key'
+BINANCE_API_SECRET = 'your_api_secret'
 
-# config.py
-
-BINANCE_API_KEY = ''
-BINANCE_API_SECRET = ''
-
-# Telegram API keys
-#TELEGRAM_BOT_TOKEN = 
-#TELEGRAM_CHAT_ID = 
-
+# Other configuration parameters
+time_interval = '1h'
+short_ema_period = 5
+medium_ema_period = 20
+long_ema_period = 99
+fixed_usdt_amount = 100  # Fixed amount in USDT
 
 # List of futures trading pairs (symbols)
 symbols = [
@@ -46,5 +46,3 @@ symbols = [
     'XVGUSDT', 'ATAUSDT', 'APTUSDT', 'ARBUSDT'
 ]
 
-# Time interval for fetching historical data
-time_interval = '15m'  # You can change this to '4h', '1d', etc.
