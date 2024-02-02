@@ -1,13 +1,13 @@
 # Replace with your Binance API key and secret
-BINANCE_API_KEY = 'your_api_key'
-BINANCE_API_SECRET = 'your_api_secret'
+BINANCE_API_KEY = 'JSUaiFx3vAeuvtXLuImGEBPcMSrwjRMWDOqGp91AlRuX63PwEqXnKWJQmfEcSXvR'
+BINANCE_API_SECRET = 'FtmsQbpCDIc64BaQ6s5l5VHHWfwrCbqsjytVMo5cHXetrsUsZBa9AqHiRtkkieMH'
 
 # Other configuration parameters
-time_interval = '1h'
-short_ema_period = 5
+time_interval = '5m'
+short_ema_period = 7
 medium_ema_period = 20
-long_ema_period = 99
-fixed_usdt_amount = 100  # Fixed amount in USDT
+long_ema_period = 30
+fixed_usdt_amount = 11  # Fixed amount in USDT
 
 # List of futures trading pairs (symbols)
 symbols = [
