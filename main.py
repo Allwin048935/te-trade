@@ -10,10 +10,14 @@ exchange = ccxt.binance({
     'enableRateLimit': True,
 })
 
-
-df['short_ema'] = df['close'].ewm(alpha=2/(short_period + 1), adjust=False).mean()
-df['medium_ema'] = df['close'].ewm(alpha=2/(medium_period + 1), adjust=False).mean()
-df['long_ema'] = df['close'].ewm(alpha=2/(long_period + 1), adjust=False).mean()
+# Function to fetch historical candlestick data and calculate EMAs
+def fetch_and_calculate_emas(symbol, short_period, medium_period, long_period, limit):
+    ohlcv = exchange.fetch_ohlcv(symbol, time_interval, limit=limit)
+    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['short_ema'] = df['close'].ewm(span=short_period, adjust=False).mean()
+    df['medium_ema'] = df['close'].ewm(span=medium_period, adjust=False).mean()
+    df['long_ema'] = df['close'].ewm(span=long_period, adjust=False).mean()
+    return df
 
 # Function to get the current market price
 def get_market_price(symbol):
