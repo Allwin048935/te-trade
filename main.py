@@ -26,10 +26,15 @@ def get_market_price(symbol):
 
 # Function to calculate the quantity based on fixed USDT amount for futures
 def calculate_quantity(symbol, usdt_amount):
-    market_price = get_market_price(symbol)
-    contract_size = exchange.fetch_ticker(symbol)['info']['contractSize']
-    quantity = usdt_amount / market_price / contract_size
-    return quantity
+    try:
+        market_price = get_market_price(symbol)
+        symbol_info = exchange.fetch_ticker(symbol)
+        contract_size = symbol_info['lotSizeFilter']['stepSize']
+        quantity = usdt_amount / market_price / float(contract_size)
+        return quantity
+    except Exception as e:
+        print(f"Error calculating quantity: {e}")
+        return None
 
 # Function to place a market buy order for futures
 def place_market_buy_order(symbol, quantity):
