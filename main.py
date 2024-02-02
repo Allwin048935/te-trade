@@ -4,7 +4,7 @@ import time
 from config import BINANCE_API_KEY, BINANCE_API_SECRET, symbols, time_interval, short_ema_period, medium_ema_period, long_ema_period, fixed_usdt_amount
 
 # Set up the Binance Futures client
-exchange = ccxt.binanceusdm({
+exchange = ccxt.binance({
     'apiKey': BINANCE_API_KEY,
     'secret': BINANCE_API_SECRET,
     'enableRateLimit': True,
@@ -29,9 +29,17 @@ def calculate_quantity(symbol, usdt_amount):
     try:
         market_price = get_market_price(symbol)
         symbol_info = exchange.fetch_ticker(symbol)
-        contract_size = symbol_info['lotSizeFilter']['stepSize']
-        quantity = usdt_amount / market_price / float(contract_size)
-        return quantity
+        
+        # Find the LOT_SIZE filter
+        lot_size_filter = next((filter for filter in symbol_info['info']['filters'] if filter['filterType'] == 'LOT_SIZE'), None)
+        
+        if lot_size_filter:
+            step_size = float(lot_size_filter['stepSize'])
+            quantity = usdt_amount / market_price / step_size
+            return quantity
+        else:
+            print(f"LOT_SIZE filter not found for {symbol}. Unable to calculate quantity.")
+            return None
     except Exception as e:
         print(f"Error calculating quantity: {e}")
         return None
