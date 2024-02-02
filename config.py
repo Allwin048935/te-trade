@@ -1,6 +1,6 @@
 # Replace with your Binance API key and secret
-BINANCE_API_KEY = 'JSUaiFx3vAeuvtXLuImGEBPcMSrwjRMWDOqGp91AlRuX63PwEqXnKWJQmfEcSXvR'
-BINANCE_API_SECRET = 'FtmsQbpCDIc64BaQ6s5l5VHHWfwrCbqsjytVMo5cHXetrsUsZBa9AqHiRtkkieMH'
+BINANCE_API_KEY = 'hlRsc8uhOpdJ2UoKZ6FXCMjIzEMjINRw3TdPLKrikXwo9yBf4pY53kyM4SYtJPwr'
+BINANCE_API_SECRET = 'vhKdU8BkHvN8oU0D881yFjNOvvHT9J45RQPWV8zw5ixFLJNwiHG86WdoYPmZxXT0'
 
 # Other configuration parameters
 time_interval = '5m'
