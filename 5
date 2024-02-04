@@ -1,0 +1,57 @@
+import ccxt
+import pandas as pd
+import time
+
+# Binance API credentials
+api_key = 'YOUR_API_KEY'
+api_secret = 'YOUR_API_SECRET'
+symbol = 'BTC/USDT'
+timeframe = '1h'
+short_ema_period = 9
+medium_ema_period = 21
+long_ema_period = 50
+
+# Initialize Binance client
+binance = ccxt.binance({
+    'apiKey': api_key,
+    'secret': api_secret,
+})
+
+def fetch_data():
+    ohlcv = binance.fetch_ohlcv(symbol, timeframe)
+    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['short_ema'] = df['close'].ewm(span=short_ema_period, adjust=False).mean()
+    df['medium_ema'] = df['close'].ewm(span=medium_ema_period, adjust=False).mean()
+    df['long_ema'] = df['close'].ewm(span=long_ema_period, adjust=False).mean()
+    return df
+
+def execute_trade(signal, position):
+    if signal == -1 and position == 1:
+        # Close long position
+        order = binance.create_market_sell_order(symbol=symbol, quantity=1)
+        print(f"Close long position at {df['close'].iloc[-1]}, timestamp: {df['timestamp'].iloc[-1]}, order ID: {order['id']}")
+        return 0
+
+    elif signal == 1 and position == 0:
+        # Enter long position
+        order = binance.create_market_buy_order(symbol=symbol, quantity=1)
+        print(f"Enter long position at {df['close'].iloc[-1]}, timestamp: {df['timestamp'].iloc[-1]}, order ID: {order['id']}")
+        return 1
+
+    return position
+
+# Continuous live trading loop
+position = 0
+while True:
+    df = fetch_data()
+    signal = 0
+    
+    if df['short_ema'].iloc[-1] > df['medium_ema'].iloc[-1]:
+        signal = 1
+    elif df['short_ema'].iloc[-1] < df['medium_ema'].iloc[-1]:
+        signal = -1
+    
+    position = execute_trade(signal, position)
+    
+    # Sleep for a specified interval before fetching new data
+    time.sleep(10)  # You can adjust this interval based on your preference
