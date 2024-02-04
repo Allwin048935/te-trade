@@ -4,8 +4,8 @@ import time
 
 # Initialize Binance Futures API
 binance_futures = ccxt.binance({
-    'apiKey': 'your_api_key',
-    'secret': 'your_api_secret',
+    'apiKey': 'JSUaiFx3vAeuvtXLuImGEBPcMSrwjRMWDOqGp91AlRuX63PwEqXnKWJQmfEcSXvR',
+    'secret': 'FtmsQbpCDIc64BaQ6s5l5VHHWfwrCbqsjytVMo5cHXetrsUsZBa9AqHiRtkkieMH',
     'enableRateLimit': True,
     'options': {
         'defaultType': 'future',
@@ -13,10 +13,10 @@ binance_futures = ccxt.binance({
 })
 
 # Define EMA periods
-ema_short_period = 10
+ema_short_period = 7
 ema_medium_period = 20
-ema_long_period = 50
-fixed_quantity_usdt = 100
+ema_long_period = 30
+fixed_quantity_usdt = 11
 symbol = 'BTC/USDT'
 leverage = 10  # Set your desired leverage
 
