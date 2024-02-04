@@ -69,7 +69,7 @@ def calculate_quantity(symbol, side):
 def main():
     while True:
         # Fetch historical data
-        historical_data = fetch_ohlc(symbol, '1h', 100)
+        historical_data = fetch_ohlc(symbol, '1m', 100)
         
         # Calculate EMAs
         historical_data['ema_short'] = calculate_ema(historical_data, ema_short_period)
@@ -110,7 +110,7 @@ def main():
                     close_order(symbol, order['id'])
     
         # Sleep for a while before the next iteration (adjust as needed)
-        time.sleep(600)  # Sleep for 10 minutes
+        time.sleep(60)  # Sleep for 10 minutes
     
 if __name__ == "__main__":
     main()
