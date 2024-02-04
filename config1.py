@@ -7,7 +7,7 @@ api_secret = 'vhKdU8BkHvN8oU0D881yFjNOvvHT9J45RQPWV8zw5ixFLJNwiHG86WdoYPmZxXT0'
 
 futures_leverage = 10
 futures_fixed_quantity_usdt = 11
-futures_symbol = [
+futures_symbols = [
     'WLDUSDT', 'SEIUSDT', 'CYBERUSDT', 'ARKUSDT','NTRNUSDT', 'TIAUSDT', 'MEMEUSDT',
     'ORDIUSDT', 'BEAMXUSDT', 'BLURUSDT', 'JTOUSDT', '1000SATSUSDT',
     'ACEUSDT', 'NFPUSDT', 'AIUSDT', 'XAIUSDT', 'MANTAUSDT', 'POWRUSDT',
