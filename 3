@@ -85,7 +85,7 @@ def main():
             # Calculate buy quantity
             quantity = calculate_quantity(symbol, 'buy')
             # Execute buy order
-            execute_order(symbol, 'buy', quantity)
+            execute_order(symbol, 'buy', amount)
     
         # Sell only when short EMA crosses down below the long EMA
         elif historical_data['ema_short'].iloc[-2] < historical_data['ema_long'].iloc[-2] and \
@@ -93,7 +93,7 @@ def main():
             # Calculate sell quantity
             quantity = calculate_quantity(symbol, 'sell')
             # Execute sell order
-            execute_order(symbol, 'sell', quantity)
+            execute_order(symbol, 'sell', amount)
     
         # Close existing buy order when short EMA crosses down below the medium EMA
         elif historical_data['ema_short'].iloc[-2] < historical_data['ema_medium'].iloc[-2] and \
