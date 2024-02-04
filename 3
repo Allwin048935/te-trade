@@ -84,6 +84,7 @@ def main():
            historical_data['ema_short'].iloc[-3] <= historical_data['ema_long'].iloc[-3]:
             # Calculate buy quantity
             quantity = calculate_quantity(symbol, 'buy')
+            amount = quantity
             # Execute buy order
             execute_order(symbol, 'buy', amount)
     
@@ -92,6 +93,7 @@ def main():
              historical_data['ema_short'].iloc[-3] >= historical_data['ema_long'].iloc[-3]:
             # Calculate sell quantity
             quantity = calculate_quantity(symbol, 'sell')
+            amount = quantity
             # Execute sell order
             execute_order(symbol, 'sell', amount)
     
