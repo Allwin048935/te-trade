@@ -16,9 +16,9 @@ binance_futures = ccxt.binance({
 })
 
 # Define EMA periods
-ema_short_period = 10
+ema_short_period = 7
 ema_medium_period = 20
-ema_long_period = 50
+ema_long_period = 30
 
 def fetch_ohlc(symbol, timeframe, limit):
     # Fetch historical candlestick data
@@ -38,10 +38,14 @@ def calculate_ema(data, period):
 
 def execute_order(symbol, side, quantity):
     # Execute market order
-    order = binance_futures.create_market_order(symbol=symbol, type=side, side=side, quantity=quantity, leverage=futures_leverage)
+    if side == 'buy':
+        order = binance_futures.create_market_buy(symbol=symbol, quantity=quantity, leverage=futures_leverage)
+    elif side == 'sell':
+        order = binance_futures.create_market_sell(symbol=symbol, quantity=quantity, leverage=futures_leverage)
     
     # Print order details
     print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {quantity}, Order ID: {order['id']}")
+
 
 def get_open_orders(symbol):
     # Retrieve open orders
