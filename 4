@@ -38,13 +38,17 @@ def calculate_ema(data, period):
 
 def execute_order(symbol, side, quantity):
     # Execute market order
+    order = None
     if side == 'buy':
         order = binance_futures.create_market_buy(symbol=symbol, quantity=quantity, leverage=futures_leverage)
     elif side == 'sell':
         order = binance_futures.create_market_sell(symbol=symbol, quantity=quantity, leverage=futures_leverage)
     
-    # Print order details
-    print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {quantity}, Order ID: {order['id']}")
+    # Check if the order was successfully created
+    if order and 'id' in order:
+        print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {quantity}, Order ID: {order['id']}")
+    else:
+        print(f"Failed to execute order - Symbol: {symbol}, Side: {side}, Quantity: {quantity}")
 
 
 def get_open_orders(symbol):
