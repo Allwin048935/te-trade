@@ -35,7 +35,7 @@ def execute_order(symbol, side, quantity):
     order = binance.create_market_order(symbol=symbol, type='market', side=side, amount=quantity)
     
     # Print order details
-    print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {quantity}, Order ID: {order['id']}")
+    print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {amount}, Order ID: {order['id']}")
 
 def get_open_orders(symbol):
     # Retrieve open orders
