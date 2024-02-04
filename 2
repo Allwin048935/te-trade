@@ -32,7 +32,7 @@ def calculate_ema(data, period):
 
 def execute_order(symbol, side, quantity):
     # Execute market order
-    order = binance.create_market_order(symbol=symbol, type='market', side=side, quantity=quantity)
+    order = binance.create_market_order(symbol=symbol, type='market', side=side, amount=quantity)
     
     # Print order details
     print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {quantity}, Order ID: {order['id']}")
