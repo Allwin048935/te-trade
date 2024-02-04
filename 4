@@ -37,18 +37,21 @@ def calculate_ema(data, period):
     return data['close'].ewm(span=period, adjust=False).mean()
 
 def execute_order(symbol, side, quantity):
-    # Execute market order
-    order = None
-    if side == 'buy':
-        order = binance_futures.create_market_buy(symbol=symbol, quantity=quantity, leverage=futures_leverage)
-    elif side == 'sell':
-        order = binance_futures.create_market_sell(symbol=symbol, quantity=quantity, leverage=futures_leverage)
-    
-    # Check if the order was successfully created
-    if order and 'id' in order:
-        print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {quantity}, Order ID: {order['id']}")
-    else:
-        print(f"Failed to execute order - Symbol: {symbol}, Side: {side}, Quantity: {quantity}")
+    try:
+        # Execute market order
+        if side == 'buy':
+            order = binance_futures.create_market_buy(symbol=symbol, quantity=quantity, leverage=futures_leverage)
+        elif side == 'sell':
+            order = binance_futures.create_market_sell(symbol=symbol, quantity=quantity, leverage=futures_leverage)
+
+        # Check if the order was successfully created
+        if order and 'id' in order:
+            print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {quantity}, Order ID: {order['id']}")
+        else:
+            print(f"Failed to execute order - Symbol: {symbol}, Side: {side}, Quantity: {quantity}")
+    except Exception as e:
+        print(f"Error executing order - Symbol: {symbol}, Side: {side}, Quantity: {quantity}. Error: {str(e)}")
+
 
 
 def get_open_orders(symbol):
