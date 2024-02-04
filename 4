@@ -1,0 +1,115 @@
+import ccxt
+import pandas as pd
+import time
+
+# Initialize Binance Futures API
+binance_futures = ccxt.binance({
+    'apiKey': 'your_api_key',
+    'secret': 'your_api_secret',
+    'enableRateLimit': True,
+    'options': {
+        'defaultType': 'future',
+    },
+})
+
+# Define EMA periods
+ema_short_period = 7
+ema_medium_period = 20
+ema_long_period = 30
+fixed_quantity_usdt = 11
+symbol = 'BTC/USDT'
+leverage = 10  # Set your desired leverage
+
+def fetch_ohlc(symbol, timeframe, limit):
+    # Fetch historical candlestick data
+    ohlc = binance_futures.fetch_ohlcv(symbol, timeframe, limit=limit)
+    
+    # Convert data to DataFrame
+    df = pd.DataFrame(ohlc, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    
+    # Convert timestamp to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    
+    return df
+
+def calculate_ema(data, period):
+    # Calculate Exponential Moving Average
+    return data['close'].ewm(span=period, adjust=False).mean()
+
+def execute_order(symbol, side, quantity):
+    # Execute market order
+    order = binance_futures.create_market_order(symbol=symbol, type=side, side=side, quantity=quantity, leverage=leverage)
+    
+    # Print order details
+    print(f"Order Executed - Symbol: {symbol}, Side: {side}, Quantity: {quantity}, Order ID: {order['id']}")
+
+def get_open_orders(symbol):
+    # Retrieve open orders
+    orders = binance_futures.fetch_open_orders(symbol=symbol)
+    return orders
+
+def close_order(symbol, order_id):
+    # Close an existing order
+    binance_futures.cancel_order(order_id, symbol=symbol)
+    print(f"Order Closed - Symbol: {symbol}, Order ID: {order_id}")
+
+def calculate_quantity(symbol, side):
+    # Calculate the quantity based on the fixed USDT amount
+    ticker = binance_futures.fetch_ticker(symbol)
+    last_price = ticker['last']
+    if side == 'buy':
+        quantity = fixed_quantity_usdt / last_price
+    elif side == 'sell':
+        quantity = fixed_quantity_usdt / last_price
+    else:
+        quantity = 0
+    return quantity
+
+def main():
+    while True:
+        # Fetch historical data
+        historical_data = fetch_ohlc(symbol, '1h', 100)
+        
+        # Calculate EMAs
+        historical_data['ema_short'] = calculate_ema(historical_data, ema_short_period)
+        historical_data['ema_medium'] = calculate_ema(historical_data, ema_medium_period)
+        historical_data['ema_long'] = calculate_ema(historical_data, ema_long_period)
+        
+        # Retrieve open orders
+        open_orders = get_open_orders(symbol)
+        
+        # Buy only when short EMA crosses over the long EMA
+        if historical_data['ema_short'].iloc[-1] > historical_data['ema_long'].iloc[-1] and \
+           historical_data['ema_short'].iloc[-2] <= historical_data['ema_long'].iloc[-2]:
+            # Calculate buy quantity
+            quantity = calculate_quantity(symbol, 'buy')
+            # Execute buy order
+            execute_order(symbol, 'market', quantity)
+    
+        # Sell only when short EMA crosses down below the long EMA
+        elif historical_data['ema_short'].iloc[-1] < historical_data['ema_long'].iloc[-1] and \
+             historical_data['ema_short'].iloc[-2] >= historical_data['ema_long'].iloc[-2]:
+            # Calculate sell quantity
+            quantity = calculate_quantity(symbol, 'sell')
+            # Execute sell order
+            execute_order(symbol, 'market', quantity)
+    
+        # Close existing buy order when short EMA crosses down below the medium EMA
+        elif historical_data['ema_short'].iloc[-1] < historical_data['ema_medium'].iloc[-1] and \
+             historical_data['ema_short'].iloc[-2] >= historical_data['ema_medium'].iloc[-2]:
+            for order in open_orders:
+                if order['side'] == 'buy':
+                    close_order(symbol, order['id'])
+    
+        # Close existing short order when short EMA crosses over the medium EMA
+        elif historical_data['ema_short'].iloc[-1] > historical_data['ema_medium'].iloc[-1] and \
+             historical_data['ema_short'].iloc[-2] <= historical_data['ema_medium'].iloc[-2]:
+            for order in open_orders:
+                if order['side'] == 'sell':
+                    close_order(symbol, order['id'])
+    
+        # Sleep for a while before the next iteration (adjust as needed)
+        time.sleep(600)  # Sleep for 10 minutes
+    
+if __name__ == "__main__":
+    main()
